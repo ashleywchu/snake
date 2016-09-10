@@ -1,41 +1,47 @@
-function main() {
-  var columns = 90,
-      rows = 60,
-      snake = new Snake(),
-      food = new Food(),
-      KEYS = { UP: "ArrowUp", DOWN: "ArrowDown", LEFT: "ArrowLeft", RIGHT: "ArrowRight" }
+var columns = 90,
+    rows = 60,
+    game = new Game(),
+    snake = new Snake(),
+    food = new Food(),
+    KEYS = { 38: "up", 40: "down", 37: "left", 39: "right" }
 
+function main() {
   canvas = document.createElement('canvas'),
   canvas.width = 900,
   canvas.height = 600,
   canvas.style = "border: 2px solid black";
+  context = canvas.getContext("2d"),
   document.body.appendChild(canvas);
+
+  addEventListener( "keydown", function(event) {
+    event.preventDefault();
+    if ( 32 === event.keyCode) {
+      game.start();
+    } else if ( event.keyCode in KEYS ) {
+      snake.direction = KEYS[event.keyCode];
+    }
+    console.log( event.keyCode );
+  }, false);
 
   init();
   loop();
 }
 
 function init() {
-  score = 0;
-
-  clearBoard();
-
   var coords = { x: Math.floor(canvas.width/2), y: Math.floor(canvas.height/2) };
+
+  game.init();
   snake.init( { x: coords.x, y: coords.y } );
   food.init();
 }
 
 function loop() {
-  clearBoard();
-  update();
-  draw();
+  if (game.over == false) {
+    game.clearBoard();
+    snake.move();
+    draw();
+  }
   requestAnimationFrame(loop);
-}
-
-function clearBoard() {
-  context = canvas.getContext("2d"),
-  context.fillStyle = "white";
-  context.fillRect(0, 0, canvas.width, canvas.height);
 }
 
 function draw() {
@@ -46,21 +52,27 @@ function draw() {
   food.draw(dx,dy);
 }
 
-function update() {
-  snake.update();
+/////////////// GAME ///////////////
+function Game() {}
 
-  // if snake got food, add segment to queue
-  if ( snake.head.x === food.coord.x && snake.head.y === food.coord.y ) {
-    score++;
-    food.init();
-  }
-  // else, remove tail segments
-  else {
-    snake.remove();
-  }
-  snake.add(snake.newHead.x, snake.newHead.y);
+Game.prototype.init = function() {
+  this.score = 0;
+  this.over = false;
+  game.clearBoard();
 }
 
+Game.prototype.start = function() {
+  this.over = false;
+}
+
+Game.prototype.stop = function() {
+  this.over = true;
+}
+
+Game.prototype.clearBoard = function() {
+  context.fillStyle = "white";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+}
 
 /////////////// SNAKE ///////////////
 // Each snake segment is stored in queue. Head is at the front of queue
@@ -87,48 +99,66 @@ Snake.prototype.draw = function(dx,dy) {
   }
 }
 
-Snake.prototype.update = function() {
-  // Update snake's direction based on key press
-  document.onkeydown = function(event) {
-    event = event || window.event;
-    switch (event.keyCode) {
-      // up
-      case 38:
-        if (this.direction !== KEYS.DOWN ) {
-          this.direction = KEYS.UP;
-          snake.updatePosition( 0, -10 );
-        };
-        break;
-      // down
-      case 40:
-        if (this.direction !== KEYS.UP ) {
-          this.direction = KEYS.DOWN;
-          snake.updatePosition( 0, 10 );
-        };
-        break;
-      // left
-      case 37:
-        if (this.direction !== KEYS.RIGHT ) {
-          this.direction = KEYS.LEFT;
-          snake.updatePosition( -10, 0 );
-        };
-        break;
-      // right
-      case 39:
-        if (this.direction !== KEYS.LEFT ) {
-          this.direction = KEYS.RIGHT;
-          snake.updatePosition( 10, 0 );
-        };
-        break;
-    }
-    event.preventDefault();
+// Updates snake's direction based on key press and moves snake
+Snake.prototype.move = function(direction) {
+  switch (direction) {
+    case "up":
+      if (this.direction !== KEYS.DOWN ) {
+        //this.direction = KEYS.UP;
+        snake.updatePosition( 0, -10 );
+      };
+      break;
+    case "down":
+      if (this.direction !== KEYS.UP ) {
+        //this.direction = KEYS.DOWN;
+        snake.updatePosition( 0, 10 );
+      };
+      break;
+    case "left":
+      if (this.direction !== KEYS.RIGHT ) {
+        //this.direction = KEYS.LEFT;
+        snake.updatePosition( -10, 0 );
+      };
+      break;
+    case "right":
+      if (this.direction !== KEYS.LEFT ) {
+        //this.direction = KEYS.RIGHT;
+        snake.updatePosition( 10, 0 );
+      };
+      break;
   }
+  snake.checkCollision();
+  snake.grow();
+  snake.add(snake.newHead.x, snake.newHead.y);
 }
 
 // Update the coordinates of snake's head
 Snake.prototype.updatePosition = function(x,y) {
   this.newHead.x = (this.newHead.x += x);
   this.newHead.y = (this.newHead.y += y);
+}
+
+// Check that the snake did not collided with itself or with the edge of the board
+Snake.prototype.checkCollision = function() {
+  if ( this.newHead.x > canvas.width || this.newHead.y > canvas.height || snake.queue.indexOf('x:' + this.newHead.x + ', y:' + this.newHead.y) >= 0) {
+    game.stop();
+  };
+  //for( var i = 0; i < snake.queue.length; i++ ) {
+  //  if (snake.queue[i].x === snake.x && snake.queue[i].y === snake.y) {
+  //    game.stop();
+  //  }
+  //}
+}
+
+// Check whether the snake got food
+Snake.prototype.grow = function() {
+  if ( this.head.x === food.coord.x && this.head.y === food.coord.y ) {
+    score++;
+    food.init();
+  }
+  else {
+    snake.remove();
+  }
 }
 
 // Add a segment to the FIFO stack
