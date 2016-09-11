@@ -15,12 +15,9 @@ function main() {
 
   addEventListener( "keydown", function(event) {
     event.preventDefault();
-    if ( 32 === event.keyCode) {
-      game.start();
-    } else if ( event.keyCode in KEYS ) {
+    if ( event.keyCode in KEYS ) {
       snake.direction = KEYS[event.keyCode];
     }
-    console.log( event.keyCode );
   }, false);
 
   init();
@@ -36,11 +33,9 @@ function init() {
 }
 
 function loop() {
-  if (game.over == false) {
     game.clearBoard();
-    snake.move();
+    snake.move( snake.direction );
     draw();
-  }
   requestAnimationFrame(loop);
 }
 
@@ -99,30 +94,26 @@ Snake.prototype.draw = function(dx,dy) {
   }
 }
 
-// Updates snake's direction based on key press and moves snake
+// Moves the snake based on snake's direction
 Snake.prototype.move = function(direction) {
   switch (direction) {
     case "up":
       if (this.direction !== KEYS.DOWN ) {
-        //this.direction = KEYS.UP;
         snake.updatePosition( 0, -10 );
       };
       break;
     case "down":
       if (this.direction !== KEYS.UP ) {
-        //this.direction = KEYS.DOWN;
         snake.updatePosition( 0, 10 );
       };
       break;
     case "left":
       if (this.direction !== KEYS.RIGHT ) {
-        //this.direction = KEYS.LEFT;
         snake.updatePosition( -10, 0 );
       };
       break;
     case "right":
       if (this.direction !== KEYS.LEFT ) {
-        //this.direction = KEYS.RIGHT;
         snake.updatePosition( 10, 0 );
       };
       break;
@@ -153,7 +144,7 @@ Snake.prototype.checkCollision = function() {
 // Check whether the snake got food
 Snake.prototype.grow = function() {
   if ( this.head.x === food.coord.x && this.head.y === food.coord.y ) {
-    score++;
+    this.score++;
     food.init();
   }
   else {
