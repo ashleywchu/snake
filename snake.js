@@ -1,9 +1,8 @@
-var columns = 90,
-    rows = 60,
-    game = new Game(),
+var COLUMNS = 90,
+    ROWS = 60,
+    game  = new Game(),
     snake = new Snake(),
-    food = new Food(),
-    KEYS = { 38: "up", 40: "down", 37: "left", 39: "right" }
+    food = new Food();
 
 function main() {
   canvas = document.createElement('canvas'),
