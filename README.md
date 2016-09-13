@@ -9,7 +9,7 @@ TODO
   - ~~Get the snake to move continuously without pressing the arrow keys~~
   - ~~Set game over logic~~
   - ~~Spacebar start~~
-  - Display score
+  - ~~Display score~~
   - Add levels
   - Write tests
   - ~mAke It pREtTy~
