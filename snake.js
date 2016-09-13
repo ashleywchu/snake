@@ -28,7 +28,7 @@ function loop() {
     requestAnimationFrame(loop);
     game.clearBoard();
     if (game.over == false) {
-      if ( snake.collision == true ) {
+      if ( snake.checkAllCollisions() ) {
         game.stop();
       } else {
         snake.move( snake.direction );
@@ -86,8 +86,24 @@ Game.prototype.showStartMessage = function() {
   context.fillText("Space bar to start", canvas.width / 4, canvas.height / 2);
 }
 
+// Check whether the snake collided with the edge of the board, itself, or
+// food (being drawn on top of the snake's body)
+Game.prototype.checkCollision = function(type,x,y) {
+  if ( type === "food" || type === "snake" ) {
+    if ( snake.queue.indexOf( 'x:' + x + ', y:' + y) >= 0 ) {
+      return true;
+    }
+  } else if ( type === "board" ) {
+    if ( x >= canvas.width || x < 0 || y >= canvas.height || y < 0 ) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /////////////// SNAKE ///////////////
-// Each snake segment is stored in queue. Head is the first set of coordinates that can be found at the front of queue, an array that represents the snake's body.
+// Each snake segment is stored in queue. Head is the first set of coordinates 
+// that can be found at the front of queue, an array that represents the snake's body.
 function Snake() {
   this.head = null,
   this.queue = [],
@@ -100,7 +116,6 @@ Snake.prototype.init = function(params) {
   this.queue = [];
   this.length = this.queue.length;
   this.nextHead = this.head;
-  this.collision = false;
   snake.add( params.x, params.y );
 }
 
@@ -137,7 +152,7 @@ Snake.prototype.move = function(direction) {
       snake.updatePosition( 10, 0 );
       break;
   }
-  snake.checkCollision();
+  snake.checkAllCollisions();
   snake.grow();
   snake.add(snake.nextHead.x, snake.nextHead.y);
 }
@@ -148,14 +163,14 @@ Snake.prototype.updatePosition = function(x,y) {
   this.nextHead.y = (this.nextHead.y += y);
 }
 
-// Check that the snake did not collided with itself or with the edge of the board
-Snake.prototype.checkCollision = function() {
-  if ( this.nextHead.x >= canvas.width || this.nextHead.x < 0 || this.nextHead.y > canvas.height || this.nextHead.y < 0 || this.queue.indexOf('x:' + this.nextHead.x + ', y:' + this.nextHead.y) >= 0) {
-    this.collision = true;
-  };
+Snake.prototype.checkAllCollisions = function() {
+  // check collision with edges of the board
+  game.checkCollision( "board", this.nextHead.x, this.nextHead.y );
+
+  // check collision with self
+  game.checkCollision( "snake", this.nextHead.x, this.nextHead.y );
 }
 
-Snake.prototype.eat
 // Check whether the snake got food
 Snake.prototype.grow = function() {
   if ( this.head.x === food.coord.x && this.head.y === food.coord.y ) {
@@ -194,6 +209,17 @@ Food.prototype.draw = function(dx,dy) {
   context.fillRect( this.coord.x, this.coord.y, dx, dy );
 }
 
+// Set food's position
+Food.prototype.setPosition = function() {
+  this.setCoordinates();
+
+  // Check to see that food coordinates are not on snake. 
+  // If it is, re-set food's coordinates.
+  if ( game.checkCollision( "food", food.coord.x, food.coord.y ) ) {
+    food.setCoordinates();
+  }
+}
+
 Food.prototype.setCoordinates = function() {
   var minX = 0,
       maxX = canvas.width,
@@ -209,15 +235,3 @@ function floor10Random(min,max) {
   var rand = Math.floor( Math.random() * (max - min + 1) );
   return Math.floor( rand / 10 ) * 10;
 }
-
-// Check to see that food coordinates are not on snake
-Food.prototype.setPosition = function() {
-  this.setCoordinates();
-
-  snake.queue.forEach( function(segment) {
-    if ( food.coord === segment ) {
-      food.setCoordinates();
-    }
-  });
-}
-
