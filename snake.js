@@ -27,6 +27,7 @@ function loop() {
   setTimeout( function() {
     requestAnimationFrame(loop);
     game.clearBoard();
+    game.showScore();
     if (game.over == false) {
       if ( snake.checkAllCollisions() ) {
         game.stop();
@@ -84,6 +85,12 @@ Game.prototype.showStartMessage = function() {
   context.font = "40px sans-serif";
   context.fillStyle= "grey";
   context.fillText("Space bar to start", canvas.width / 4, canvas.height / 2);
+}
+
+Game.prototype.showScore = function() {
+  context.font = "20px sans-serif"
+  context.fillStyle= "grey";
+  context.fillText("Score: " + game.score, 10, canvas.height - 10);
 }
 
 // Check whether the snake collided with the edge of the board, itself, or
@@ -174,7 +181,7 @@ Snake.prototype.checkAllCollisions = function() {
 // Check whether the snake got food
 Snake.prototype.grow = function() {
   if ( this.head.x === food.coord.x && this.head.y === food.coord.y ) {
-    this.score++;
+    game.score++;
     food.init();
   }
   else {
