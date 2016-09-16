@@ -107,8 +107,10 @@ Game.prototype.showScore = function() {
 // food (being drawn on top of the snake's body)
 Game.prototype.checkCollision = function(type,x,y) {
   if ( type === "food" || type === "snake" ) {
-    if ( snake.queue.indexOf( 'x:' + x + ', y:' + y) >= 0 ) {
-      return true;
+    for( var i = 0; i < snake.queue.length; i++ ) {
+      if (snake.queue[i].x === x && snake.queue[i].y === y) {
+        return true;
+      }
     }
   } else if ( type === "board" ) {
     if ( x >= canvas.width || x < 0 || y >= canvas.height || y < 0 ) {
@@ -182,10 +184,17 @@ Snake.prototype.updatePosition = function(x,y) {
 
 Snake.prototype.checkAllCollisions = function() {
   // check collision with edges of the board
-  game.checkCollision( "board", this.nextHead.x, this.nextHead.y );
+  var boardCollide = game.checkCollision( "board", this.nextHead.x, this.nextHead.y );
 
   // check collision with self
-  game.checkCollision( "snake", this.nextHead.x, this.nextHead.y );
+  if ( this.length <= 1 ) {
+    var selfCollide = false;
+  } else {
+    var selfCollide = game.checkCollision( "snake", this.nextHead.x, this.nextHead.y );
+  }
+
+  if ( boardCollide || selfCollide ) { return true; }
+  return false;
 }
 
 // Check whether the snake got food
