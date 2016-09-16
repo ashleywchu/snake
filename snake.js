@@ -20,6 +20,7 @@ function main() {
     snake.setDirection( event.keyCode );
   }, false);
 
+  init();
   loop();
 }
 
@@ -35,8 +36,11 @@ function loop() {
         snake.move( snake.direction );
         draw();
       }
-    } else {
+    } else if (game.over == true) {
+      game.clearBoard();
+      game.showGameOverMessage();
       init();
+      return;
     }
   }, 1000 / game.fps);
 }
@@ -85,6 +89,12 @@ Game.prototype.showStartMessage = function() {
   context.font = "40px sans-serif";
   context.fillStyle= "grey";
   context.fillText("Space bar to start", canvas.width / 4, canvas.height / 2);
+}
+
+Game.prototype.showGameOverMessage = function() {
+  context.font = "40px sans-serif";
+  context.fillStyle= "grey";
+  context.fillText("Game Over. Your score is " + game.score, canvas.width / 4, canvas.height / 2);
 }
 
 Game.prototype.showScore = function() {
