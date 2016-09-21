@@ -30,10 +30,11 @@ function loop() {
     game.clearBoard();
     game.showScore();
     if (game.over == false) {
-      if ( snake.checkAllCollisions() ) {
+      if (snake.collided == true) {
         game.stop();
       } else {
-        snake.move( snake.direction );
+        snake.updateHead( snake.direction );
+        snake.updatePosition();
         draw();
       }
     } else if (game.over == true) {
@@ -134,7 +135,8 @@ Snake.prototype.init = function(params) {
   this.direction = "right";
   this.queue = [];
   this.length = this.queue.length;
-  this.nextHead = this.head;
+  this.nextHead = { x: 10, y: 0};
+  this.collided = false;
   snake.add( params.x, params.y );
 }
 
@@ -154,47 +156,55 @@ Snake.prototype.setDirection = function(keyCode) {
   else if( keyCode == 37 && this.direction !== "right" ) this.direction = "left";
 }
 
-// Moves the snake based on snake's direction
-Snake.prototype.move = function(direction) {
+// Updates the snake's head based on snake's direction
+Snake.prototype.updateHead = function(direction) {
   switch (direction) {
     // up
     case "up":
-      snake.updatePosition( 0, -10 );
+      snake.updateHeadDirection( 0, -10 );
       break;
     case "down":
-      snake.updatePosition( 0, 10 );
+      snake.updateHeadDirection( 0, 10 );
       break;
     case "left":
-      snake.updatePosition( -10, 0 );
+      snake.updateHeadDirection( -10, 0 );
       break;
     case "right":
-      snake.updatePosition( 10, 0 );
+      snake.updateHeadDirection( 10, 0 );
       break;
   }
-  snake.checkAllCollisions();
+}
+
+// Update the coordinates of the next snake head
+Snake.prototype.updateHeadDirection = function(x,y) {
+  this.nextHead.x = x;
+  this.nextHead.y = y;
+}
+
+// Update the snake's position accordingly
+Snake.prototype.updatePosition = function() {
+  var newHead = {};
+  newHead.x = (this.head.x += this.nextHead.x);
+  newHead.y = (this.head.y += this.nextHead.y);
+
+  snake.checkAllCollisions(newHead);
   snake.grow();
-  snake.add(snake.nextHead.x, snake.nextHead.y);
+  snake.add(newHead.x, newHead.y);
 }
 
-// Update the coordinates of snake's head
-Snake.prototype.updatePosition = function(x,y) {
-  this.nextHead.x = (this.nextHead.x += x);
-  this.nextHead.y = (this.nextHead.y += y);
-}
-
-Snake.prototype.checkAllCollisions = function() {
+Snake.prototype.checkAllCollisions = function(newHead) {
   // check collision with edges of the board
-  var boardCollide = game.checkCollision( "board", this.nextHead.x, this.nextHead.y );
+  var boardCollide = game.checkCollision( "board", newHead.x, newHead.y );
 
   // check collision with self
   if ( this.length <= 1 ) {
     var selfCollide = false;
   } else {
-    var selfCollide = game.checkCollision( "snake", this.nextHead.x, this.nextHead.y );
+    var selfCollide = game.checkCollision( "snake", newHead.x, newHead.y );
   }
 
-  if ( boardCollide || selfCollide ) { return true; }
-  return false;
+  if ( boardCollide || selfCollide ) { return this.collided = true;}
+  return this.collided = false;
 }
 
 // Check whether the snake got food
