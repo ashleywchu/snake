@@ -3,15 +3,20 @@ var ROWS = 60;
 var game  = new Game();
 var snake = new Snake();
 var food = new Food();
+var canvas = document.createElement('canvas');
+var context = canvas.getContext("2d");
 
 function main() {
-  canvas = document.createElement('canvas'),
   canvas.width = 900,
   canvas.height = 600,
   canvas.style = "border: 2px solid black";
-  context = canvas.getContext("2d"),
   document.body.appendChild(canvas);
 
+  eventListener();
+  loop();
+}
+
+function eventListener() {
   addEventListener( "keydown", function(event) {
     event.preventDefault();
     if ( event.keyCode == 32 ) {
