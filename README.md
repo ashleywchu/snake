@@ -1,9 +1,10 @@
 # Snake Game
+[Play here!](http://www.ashleywchu.com/snake/)
 
 Technology
   - Javascript
   - HTML5 canvas
-  
+
 TODO
   - ~~Figure out why added segments all have the same coordinates~~
   - ~~Get the snake to move continuously without pressing the arrow keys~~
