@@ -119,21 +119,18 @@ Game.prototype.checkCollision = function(type,x,y) {
 }
 
 /////////////// SNAKE ///////////////
-// Each snake segment is stored in queue. Head is the first set of coordinates 
-// that can be found at the front of queue, an array that represents the snake's body.
+// Each snake segment is stored in queue. Head is the pointer to the first
+// element in the queue, an array that represents the snake's body.
 function Snake() {
   this.head = null,
-  this.queue = [],
+  this.queue = null,
   this.direction = null;
 }
 
 Snake.prototype.init = function(params) {
   this.head = { x: params.x, y: params.y };
-  this.direction = "right";
   this.queue = [];
-  this.length = this.queue.length;
-  this.nextHead = { x: 10, y: 0};
-  this.collided = false;
+  this.direction = "right";
   snake.add( params.x, params.y );
 }
 
@@ -145,7 +142,7 @@ Snake.prototype.draw = function(dx,dy) {
   }
 }
 
-// Sets the snake's direction
+// Sets the snake's direction when on of the arrow keys is pressed
 Snake.prototype.setDirection = function(keyCode) {
   if( keyCode == 40 && this.direction !== "up" ) this.direction = "down";
   else if( keyCode == 38 && this.direction !== "down" ) this.direction = "up";
@@ -153,55 +150,62 @@ Snake.prototype.setDirection = function(keyCode) {
   else if( keyCode == 37 && this.direction !== "right" ) this.direction = "left";
 }
 
-// Updates the snake's head based on snake's direction
-Snake.prototype.updateHead = function(direction) {
+// Returns a function with the appropriate coordinate adjustments
+// based on the direction parameter
+function fromDirection(direction, func) {
   switch (direction) {
     // up
     case "up":
-      snake.updateHeadDirection( 0, -10 );
+      func( 0, -10 );
       break;
     case "down":
-      snake.updateHeadDirection( 0, 10 );
+      func( 0, 10 );
       break;
     case "left":
-      snake.updateHeadDirection( -10, 0 );
+      func( -10, 0 );
       break;
     case "right":
-      snake.updateHeadDirection( 10, 0 );
+      func( 10, 0 );
       break;
   }
 }
 
-// Update the coordinates of the next snake head
-Snake.prototype.updateHeadDirection = function(x,y) {
-  this.nextHead.x = x;
-  this.nextHead.y = y;
+// Returns the next snake head coordinates
+function getNextHead() {
+  let x = snake.head.x;
+  let y = snake.head.y;
+
+  fromDirection(snake.direction, function(newX,newY) {
+    x += newX;
+    y += newY;
+  });
+
+  return { x: x , y: y };
 }
 
 // Update the snake's position accordingly
-Snake.prototype.updatePosition = function() {
-  var newHead = {};
-  newHead.x = (this.head.x += this.nextHead.x);
-  newHead.y = (this.head.y += this.nextHead.y);
+Snake.prototype.update = function() {
+  let newHead = getNextHead();
 
-  snake.checkAllCollisions(newHead);
   snake.grow();
   snake.add(newHead.x, newHead.y);
 }
 
-Snake.prototype.checkAllCollisions = function(newHead) {
+// Check if the snake collided with either the board or itself
+Snake.prototype.collided = function() {
+  let newHead = getNextHead();
+
   // check collision with edges of the board
   var boardCollide = game.checkCollision( "board", newHead.x, newHead.y );
 
   // check collision with self
-  if ( this.length <= 1 ) {
+  if ( this.queue.length <= 2 ) {
     var selfCollide = false;
   } else {
     var selfCollide = game.checkCollision( "snake", newHead.x, newHead.y );
   }
 
-  if ( boardCollide || selfCollide ) { return this.collided = true;}
-  return this.collided = false;
+  return (boardCollide || selfCollide);
 }
 
 // Check whether the snake got food
@@ -217,14 +221,12 @@ Snake.prototype.grow = function() {
 
 // Add a segment to the FIFO stack
 Snake.prototype.add = function(x,y) {
-  length++;
   this.queue.unshift( {x:x, y:y} );
   this.head = this.queue[0];
 }
 
 // Returns the last segment
 Snake.prototype.remove = function(queue) {
-  length--;
   return this.queue.pop();
 }
 
@@ -246,8 +248,8 @@ Food.prototype.draw = function(dx,dy) {
 Food.prototype.setPosition = function() {
   this.setCoordinates();
 
-  // Check to see that food coordinates are not on snake. 
-  // If it is, re-set food's coordinates.
+  // Check to see that food coordinates are not on snake.
+  // If it is, reset food's coordinates.
   if ( game.checkCollision( "food", food.coord.x, food.coord.y ) ) {
     food.setCoordinates();
   }
