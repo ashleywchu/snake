@@ -24,9 +24,6 @@ function eventListener() {
     }
     snake.setDirection( event.keyCode );
   }, false);
-
-  init();
-  loop();
 }
 
 function loop() {
@@ -34,19 +31,15 @@ function loop() {
     requestAnimationFrame(loop);
     game.clearBoard();
     game.showScore();
-    if (game.over == false) {
-      if (snake.collided == true) {
+    if (!game.isOver()) {
+      if (snake.collided()) {
         game.stop();
       } else {
-        snake.updateHead( snake.direction );
-        snake.updatePosition();
+        snake.update();
         draw();
       }
-    } else if (game.over == true) {
-      game.clearBoard();
-      game.showGameOverMessage();
+    } else {
       init();
-      return;
     }
   }, 1000 / game.fps);
 }
@@ -68,11 +61,12 @@ function draw() {
 }
 
 /////////////// GAME ///////////////
-function Game() {}
+function Game() {
+  this.over = true;
+}
 
 Game.prototype.init = function() {
   this.score = 0;
-  this.over = true;
   game.clearBoard();
   this.fps = 20;
   game.showStartMessage();
@@ -84,6 +78,10 @@ Game.prototype.start = function() {
 
 Game.prototype.stop = function() {
   this.over = true;
+}
+
+Game.prototype.isOver = function() {
+  return this.over;
 }
 
 Game.prototype.clearBoard = function() {
