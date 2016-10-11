@@ -95,12 +95,6 @@ Game.prototype.showStartMessage = function() {
   context.fillText("Space bar to start", canvas.width / 4, canvas.height / 2);
 }
 
-Game.prototype.showGameOverMessage = function() {
-  context.font = "40px sans-serif";
-  context.fillStyle= "grey";
-  context.fillText("Game Over. Your score is " + game.score, canvas.width / 4, canvas.height / 2);
-}
-
 Game.prototype.showScore = function() {
   context.font = "20px sans-serif"
   context.fillStyle= "grey";
