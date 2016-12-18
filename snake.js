@@ -1,4 +1,6 @@
-var COLUMNS = 90;
+var WIDTH = 500;
+var HEIGHT = 500;
+var COLUMNS = 60;
 var ROWS = 60;
 var game  = new Game();
 var snake = new Snake();
@@ -7,9 +9,8 @@ var canvas = document.createElement('canvas');
 var context = canvas.getContext("2d");
 
 function main() {
-  canvas.width = 900,
-  canvas.height = 600,
-  canvas.style = "border: 2px solid black";
+  canvas.width = WIDTH,
+  canvas.height = HEIGHT,
   document.body.appendChild(canvas);
 
   eventListener();
@@ -70,6 +71,7 @@ Game.prototype.init = function() {
   game.clearBoard();
   this.fps = 20;
   game.showStartMessage();
+  game.showScore();
 }
 
 Game.prototype.start = function() {
@@ -85,33 +87,41 @@ Game.prototype.isOver = function() {
 }
 
 Game.prototype.clearBoard = function() {
-  context.fillStyle = "white";
+  context.fillStyle = "black";
   context.fillRect(0, 0, canvas.width, canvas.height);
 }
 
 Game.prototype.showStartMessage = function() {
-  context.font = "40px sans-serif";
-  context.fillStyle= "grey";
-  context.fillText("Space bar to start", canvas.width / 4, canvas.height / 2);
+  context.font = "53px Blocks";
+  context.fillStyle = "white";
+  context.fillText("SNAKE", 100, 225);
+
+  context.font = "25px Blocks";
+  context.fillStyle = "white";
+  context.fillText("space bar to start", 150, 280);
 }
 
 Game.prototype.showScore = function() {
-  context.font = "20px sans-serif"
-  context.fillStyle= "grey";
-  context.fillText("Score: " + game.score, 10, canvas.height - 10);
+  context.font = "20px Blocks"
+  context.fillStyle= "white";
+  context.fillText("score: " + game.score, 10, canvas.height - 10);
 }
 
 // Check whether the snake collided with the edge of the board, itself, or
 // food (being drawn on top of the snake's body)
 Game.prototype.checkCollision = function(type,x,y) {
+  var a = 0;
+  var b = 0;
   if ( type === "food" || type === "snake" ) {
     for( var i = 0; i < snake.queue.length; i++ ) {
       if (snake.queue[i].x === x && snake.queue[i].y === y) {
+        a = 100;
         return true;
       }
     }
   } else if ( type === "board" ) {
     if ( x >= canvas.width || x < 0 || y >= canvas.height || y < 0 ) {
+      b = 100;
       return true;
     }
   }
@@ -123,7 +133,7 @@ Game.prototype.checkCollision = function(type,x,y) {
 // element in the queue, an array that represents the snake's body.
 function Snake() {
   this.head = null,
-  this.queue = null,
+  this.queue = [],
   this.direction = null;
 }
 
