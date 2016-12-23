@@ -98,7 +98,11 @@ Game.prototype.showStartMessage = function() {
 
   context.font = "25px Blocks";
   context.fillStyle = "white";
-  context.fillText("space bar to start", 150, 280);
+  context.fillText("arrow keys to move", 150, 280);
+
+  context.font = "25px Blocks";
+  context.fillStyle = "white";
+  context.fillText("space bar to start", 150, 300);
 }
 
 Game.prototype.showScore = function() {
