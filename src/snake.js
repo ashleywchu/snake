@@ -110,18 +110,14 @@ Game.prototype.showScore = function() {
 // Check whether the snake collided with the edge of the board, itself, or
 // food (being drawn on top of the snake's body)
 Game.prototype.checkCollision = function(type,x,y) {
-  var a = 0;
-  var b = 0;
   if ( type === "food" || type === "snake" ) {
     for( var i = 0; i < snake.queue.length; i++ ) {
       if (snake.queue[i].x === x && snake.queue[i].y === y) {
-        a = 100;
         return true;
       }
     }
   } else if ( type === "board" ) {
     if ( x >= canvas.width || x < 0 || y >= canvas.height || y < 0 ) {
-      b = 100;
       return true;
     }
   }
@@ -139,9 +135,9 @@ function Snake() {
 
 Snake.prototype.init = function(params) {
   this.head = { x: params.x, y: params.y };
-  this.queue = [];
+  this.queue = [this.head];
   this.direction = "right";
-  snake.add( params.x, params.y );
+  //snake.add( params.x, params.y );
 }
 
 Snake.prototype.draw = function(dx,dy) {
