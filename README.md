@@ -1,5 +1,5 @@
 # Snake Game
-[Play here!](http://www.ashleywchu.com/snake/)
+[Play here!](https://www.ashleywchu.com/snake/)
 
 Technology
   - Javascript
